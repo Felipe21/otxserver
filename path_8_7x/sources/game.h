@@ -18,7 +18,6 @@
 #ifndef __GAME__
 #define __GAME__
 #include "otsystem.h"
-#include <boost/tr1/unordered_map.hpp>
 
 #include "enums.h"
 #include "templates.h"
@@ -89,7 +88,7 @@ enum ReloadInfo_t
 #ifdef __LOGIN_SERVER__
 	RELOAD_GAMESERVERS = 5,
 #endif
-	RELOAD_GLOBALEVENTS = 6,
+		RELOAD_GLOBALEVENTS = 6,
 	RELOAD_GROUPS = 7,
 	RELOAD_HIGHSCORES = 8,
 	RELOAD_ITEMS = 9,
@@ -110,6 +109,21 @@ enum ReloadInfo_t
 	RELOAD_LAST = RELOAD_MODS
 };
 
+struct RuleViolation
+{
+	RuleViolation(Player* _reporter, const std::string& _text, uint32_t _time):
+		reporter(_reporter), gamemaster(NULL), text(_text), time(_time), isOpen(true) {}
+
+	Player* reporter;
+	Player* gamemaster;
+	std::string text;
+	uint32_t time;
+	bool isOpen;
+
+	private:
+		RuleViolation(const RuleViolation&);
+};
+
 enum SaveFlag_t
 {
 	SAVE_PLAYERS = 1 << 0,
@@ -124,6 +138,7 @@ struct RefreshBlock_t
 	uint64_t lastRefresh;
 };
 
+typedef std::map<uint32_t, shared_ptr<RuleViolation> > RuleViolationsMap;
 typedef std::map<Tile*, RefreshBlock_t> RefreshTiles;
 typedef std::vector< std::pair<std::string, uint32_t> > Highscore;
 typedef std::list<Position> Trash;
@@ -335,15 +350,23 @@ class Game
 		uint32_t getMonstersOnline() {return (uint32_t)Monster::autoList.size();}
 		uint32_t getNpcsOnline() {return (uint32_t)Npc::autoList.size();}
 		uint32_t getCreaturesOnline() {return (uint32_t)autoList.size();}
+		uint32_t getPlayersWithMcLimit();
 
 		uint32_t getPlayersRecord() const {return playersRecord;}
 		void getWorldLightInfo(LightInfo& lightInfo);
 
-		void getSpectators(SpectatorVec& list, const Position& centerPos, bool checkforduplicate = false, bool multifloor = false,
+		void getSpectators(SpectatorVec& list, const Position& centerPos, bool multifloor = false, bool onlyPlayers = false,
 			int32_t minRangeX = 0, int32_t maxRangeX = 0,
 			int32_t minRangeY = 0, int32_t maxRangeY = 0)
-			{map->getSpectators(list, centerPos, checkforduplicate, multifloor, minRangeX, maxRangeX, minRangeY, maxRangeY);}
-		const SpectatorVec& getSpectators(const Position& centerPos) {return map->getSpectators(centerPos);}
+		{
+			map->getSpectators(list, centerPos, multifloor, onlyPlayers, minRangeX, maxRangeX, minRangeY, maxRangeY);
+		}
+		SpectatorVec getSpectators(const Position& centerPos) {
+			SpectatorVec list;
+			map->getSpectators(list, centerPos, true, false);
+			return list;
+		}
+
 		void clearSpectatorCache() {if(map) map->clearSpectatorCache();}
 
 		ReturnValue internalMoveCreature(Creature* creature, Direction direction, uint32_t flags = 0);
@@ -461,6 +484,9 @@ class Game
 		bool playerReportBug(uint32_t playerId, std::string comment);
 		bool playerReportViolation(uint32_t playerId, ReportType_t type, uint8_t reason, const std::string& name,
 			const std::string& comment, const std::string& translation, uint32_t statementId);
+		bool playerViolationWindow(uint32_t playerId, std::string name, uint8_t reason,
+			ViolationAction_t action, std::string comment, std::string statement,
+			uint32_t statementId, bool ipBanishment);
 		bool playerMoveThing(uint32_t playerId, const Position& fromPos, uint16_t spriteId,
 			int16_t fromStackpos, const Position& toPos, uint8_t count);
 		bool playerMoveCreature(uint32_t playerId, uint32_t movingCreatureId,
@@ -476,6 +502,9 @@ class Game
 		bool playerCloseChannel(uint32_t playerId, uint16_t channelId);
 		bool playerOpenPrivateChannel(uint32_t playerId, std::string& receiver);
 		bool playerCloseNpcChannel(uint32_t playerId);
+		bool playerProcessRuleViolation(uint32_t playerId, const std::string& name);
+		bool playerCloseRuleViolation(uint32_t playerId, const std::string& name);
+		bool playerCancelRuleViolation(uint32_t playerId);
 		bool playerReceivePing(uint32_t playerId);
 		bool playerAutoWalk(uint32_t playerId, std::list<Direction>& listDir);
 		bool playerStopAutoWalk(uint32_t playerId);
@@ -516,7 +545,7 @@ class Game
 		bool playerTurn(uint32_t playerId, Direction dir);
 		bool playerRequestOutfit(uint32_t playerId);
 		bool playerSay(uint32_t playerId, uint16_t channelId, MessageClasses type,
-			const std::string& receiver, const std::string& text);
+		const std::string& receiver, const std::string& text);
 		bool playerChangeOutfit(uint32_t playerId, Outfit_t outfit);
 		bool playerChangeMountStatus(uint32_t playerId, bool status);
 		bool playerInviteToParty(uint32_t playerId, uint32_t invitedId);
@@ -619,6 +648,10 @@ class Game
 		void addStatsMessage(const SpectatorVec& list, MessageClasses mClass, const std::string& message,
 			const Position& pos, MessageDetails* details = NULL);
 
+		const RuleViolationsMap& getRuleViolations() const {return ruleViolations;}
+		bool cancelRuleViolation(Player* player);
+		bool closeRuleViolation(Player* player);
+
 		bool loadExperienceStages();
 		double getExperienceStage(uint32_t level, double divider = 1.);
 
@@ -629,7 +662,7 @@ class Game
 		Map* getMap() {return map;}
 		const Map* getMap() const {return map;}
 
-		bool isRunning() const {return services && services->isRunning();}
+		bool isRunning() const {return services && services->is_running();}
 		int32_t getLightHour() const {return lightHour;}
 		void startDecay(Item* item);
 
@@ -643,6 +676,8 @@ class Game
 		bool playerSpeakTo(Player* player, MessageClasses type, const std::string& receiver, const std::string& text, uint32_t statementId);
 		bool playerSpeakToChannel(Player* player, MessageClasses type, const std::string& text, uint16_t channelId, uint32_t statementId);
 		bool playerSpeakToNpc(Player* player, const std::string& text);
+		bool playerReportRuleViolation(Player* player, const std::string& text);
+		bool playerContinueReport(Player* player, const std::string& text);
 
 		struct GameEvent
 		{
@@ -654,6 +689,7 @@ class Game
 		std::vector<Thing*> releaseThings;
 		std::map<Item*, uint32_t> tradeItems;
 		AutoList<Creature> autoList;
+		RuleViolationsMap ruleViolations;
 
 		size_t checkCreatureLastIndex;
 		std::vector<Creature*> checkCreatureVectors[EVENT_CREATURECOUNT];

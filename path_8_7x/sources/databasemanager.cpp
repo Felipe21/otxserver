@@ -1324,22 +1324,7 @@ uint32_t DatabaseManager::updateDatabase()
 
 		case 32:
 		{
-			std::clog << "> Updating database to version 33... (Drop Rule Violation System)" << std::endl;
-			if(db->getDatabaseEngine() == DATABASE_ENGINE_MYSQL)
-			{
-				query << "ALTER TABLE `bans` DROP `reason`;";
-				db->query(query.str());
-				query.str("");
-
-				query << "ALTER TABLE `bans` DROP `action`;";
-				db->query(query.str());
-				query.str("");
-
-				query << "ALTER TABLE `bans` DROP `statement`;";
-				db->query(query.str());
-				query.str("");
-			}
-
+			std::clog << "> Updating database to version 33... (Modern Depot System ths no work on 9.60-)" << std::endl;
 			registerDatabaseConfig("db_version", 33);
 			return 33;
 		}

@@ -38,7 +38,7 @@ extern "C"
 	#endif
 }
 #endif
-#include <boost/tr1/unordered_map.hpp>
+
 
 #include "database.h"
 #include "position.h"
@@ -445,16 +445,15 @@ class LuaInterface
 		static int32_t luaDoAddIpBanishment(lua_State* L);
 		static int32_t luaDoAddPlayerBanishment(lua_State* L);
 		static int32_t luaDoAddAccountBanishment(lua_State* L);
-		static int32_t luaDoAddAccountWarnings(lua_State* L);
 		static int32_t luaDoAddNotation(lua_State* L);
 		static int32_t luaDoAddStatement(lua_State* L);
 		static int32_t luaDoRemoveIpBanishment(lua_State* L);
 		static int32_t luaDoRemovePlayerBanishment(lua_State* L);
 		static int32_t luaDoRemoveAccountBanishment(lua_State* L);
-		static int32_t luaDoRemoveAccountWarnings(lua_State* L);
+		static int32_t luaDoAddAccountWarnings(lua_State* L);
+		static int32_t luaGetAccountWarnings(lua_State* L);
 		static int32_t luaDoRemoveNotations(lua_State* L);
 		static int32_t luaDoRemoveStatements(lua_State* L);
-		static int32_t luaGetAccountWarnings(lua_State* L);
 		static int32_t luaGetNotationsCount(lua_State* L);
 		static int32_t luaGetStatementsCount(lua_State* L);
 		static int32_t luaGetBanData(lua_State* L);
@@ -699,11 +698,6 @@ class LuaInterface
 		static int32_t luaGetConfigValue(lua_State* L);
 		static int32_t luaGetModList(lua_State* L);
 		static int32_t luaDoPlayerSetWalkthrough(lua_State* L);
-		static int32_t luaDoPlayerAddMount(lua_State* L);
-		static int32_t luaDoPlayerRemoveMount(lua_State* L);
-		static int32_t luaCanPlayerRideMount(lua_State* L);
-		static int32_t luaDoPlayerSetMounted(lua_State* L);
-		static int32_t luaGetMountInfo(lua_State* L);
 		static int32_t luaIsPlayerUsingOtclient(lua_State* L);
 		static int32_t luaDoSendPlayerExtendedOpcode(lua_State* L);
 

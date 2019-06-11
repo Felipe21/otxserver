@@ -114,11 +114,6 @@ bool ConfigManager::load()
 		m_confBool[LOGIN_ONLY_LOGINSERVER] = getGlobalBool("loginOnlyWithLoginServer", false);
 		#endif
 		m_confString[ENCRYPTION_TYPE] = getGlobalString("encryptionType", "sha256");
-		m_confString[RSA_PRIME1] = getGlobalString("rsaPrime1", "14299623962416399520070177382898895550795403345466153217470516082934737582776038882967213386204600674145392845853859217990626450972452084065728686565928113");
-		m_confString[RSA_PRIME2] = getGlobalString("rsaPrime2", "7630979195970404721891201847792002125535401292779123937207447574596692788513647179235335529307251350570728407373705564708871762033017096809910315212884101");
-		m_confString[RSA_PUBLIC] = getGlobalString("rsaPublic", "65537");
-		m_confString[RSA_MODULUS] = getGlobalString("rsaModulus", "109120132967399429278860960508995541528237502902798129123468757937266291492576446330739696001110603907230888610072655818825358503429057592827629436413108566029093628212635953836686562675849720620786279431090218017681061521755056710823876476444260558147179707119674283982419152118103759076030616683978566631413");
-		m_confString[RSA_PRIVATE] = getGlobalString("rsaPrivate", "46730330223584118622160180015036832148732986808519344675210555262940258739805766860224610646919605860206328024326703361630109888417839241959507572247284807035235569619173792292786907845791904955103601652822519121908367187885509270025388641700821735345222087940578381210879116823013776808975766851829020659073");
 	}
 
 	m_confString[MAP_AUTHOR] = getGlobalString("mapAuthor", "Unknown");
@@ -183,6 +178,7 @@ bool ConfigManager::load()
 	m_confBool[FREE_PREMIUM] = getGlobalBool("freePremium", false);
 	m_confNumber[PROTECTION_LEVEL] = getGlobalNumber("protectionLevel", 1);
 	m_confNumber[STATUSQUERY_TIMEOUT] = getGlobalNumber("statusTimeout", 300000);
+	m_confBool[BROADCAST_BANISHMENTS] = getGlobalBool("broadcastBanishments", true);
 	m_confBool[GENERATE_ACCOUNT_NUMBER] = getGlobalBool("generateAccountNumber", false);
 	m_confBool[GENERATE_ACCOUNT_SALT] = getGlobalBool("generateAccountSalt", false);
 	m_confBool[INGAME_GUILD_MANAGEMENT] = getGlobalBool("ingameGuildManagement", true);
@@ -199,6 +195,7 @@ bool ConfigManager::load()
 	m_confBool[HOUSE_PRICEASRENT] = getGlobalBool("housePriceAsRent", false);
 	m_confString[HOUSE_STORAGE] = getGlobalString("houseDataStorage", "binary");
 	m_confNumber[RED_SKULL_LENGTH] = getGlobalNumber("redSkullLength", 2592000);
+	m_confNumber[MAX_VIOLATIONCOMMENT_SIZE] = getGlobalNumber("maxViolationCommentSize", 60);
 	m_confNumber[BLACK_SKULL_LENGTH] = getGlobalNumber("blackSkullLength", 3888000);
 	m_confNumber[NOTATIONS_TO_BAN] = getGlobalNumber("notationsToBan", 3);
 	m_confNumber[WARNINGS_TO_FINALBAN] = getGlobalNumber("warningsToFinalBan", 4);
@@ -298,6 +295,7 @@ bool ConfigManager::load()
 	m_confBool[USE_FRAG_HANDLER] = getGlobalBool("useFragHandler", true);
 	m_confNumber[LOOT_MESSAGE] = getGlobalNumber("monsterLootMessage", 3);
 	m_confNumber[LOOT_MESSAGE_TYPE] = getGlobalNumber("monsterLootMessageType", 19);
+	m_confNumber[NAME_REPORT_TYPE] = getGlobalNumber("violationNameReportActionType", 2);
 	m_confNumber[HOUSE_CLEAN_OLD] = getGlobalNumber("houseCleanOld", 0);
 	m_confBool[VIPLIST_PER_PLAYER] = getGlobalBool("separateVipListPerCharacter", false);
 	m_confDouble[RATE_MONSTER_HEALTH] = getGlobalDouble("rateMonsterHealth", 1);
@@ -324,7 +322,6 @@ bool ConfigManager::load()
 	m_confNumber[FIST_BASE_ATTACK] = getGlobalNumber("fistBaseAttack", 7);
 	m_confBool[ALLOW_MOUNTS] = getGlobalBool("useMounts", true);
 	m_confBool[UNMOUNT_PLAYER_IN_PZ] = getGlobalBool("unmountPlayerInPz", true);
-	m_confBool[ENABLE_COOLDOWNS] = getGlobalBool("enableCooldowns", true);
 	m_confBool[MONSTER_SPAWN_WALKBACK] = getGlobalBool("monsterSpawnWalkback", true);
 	m_confNumber[PVP_BLESSING_THRESHOLD] = getGlobalNumber("pvpBlessingThreshold", 40);
 	m_confNumber[FAIRFIGHT_TIMERANGE] = getGlobalNumber("fairFightTimeRange", 60);
@@ -360,11 +357,12 @@ bool ConfigManager::load()
 	m_confNumber[HIGHSCORES_UPDATETIME] = getGlobalNumber("updateHighscoresAfterMinutes", 60);
 	m_confNumber[LOGIN_PROTECTION_TIME] = getGlobalNumber("loginProtectionTime", 10);
 	m_confBool[CLASSIC_EQUIPMENT_SLOTS] = getGlobalBool("classicEquipmentSlots", false);
-	m_confBool[OPTIONAL_PROTECTION] = getGlobalBool("optionalProtection", false);
+	m_confBool[NO_ATTACKHEALING_SIMULTANEUS] = getGlobalBool("noAttackHealingSimultaneus", false);
+	m_confBool[OPTIONAL_PROTECTION] = getGlobalBool("optionalProtection", true);
 	m_confBool[MONSTER_ATTACK_MONSTER] = getGlobalBool("monsterAttacksOnlyDamagePlayers", true);
 	m_confBool[ALLOW_CORPSE_BLOCK] = getGlobalBool("allowCorpseBlock", false);
 	m_confBool[ALLOW_INDEPENDENT_PUSH] = getGlobalBool("allowIndependentCreaturePush", true);
-	
+
 	m_loaded = true;
 	return true;
 }

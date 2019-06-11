@@ -225,9 +225,9 @@ CreatureEventType_t CreatureEvents::getType(const std::string& type)
 		_type = CREATURE_EVENT_PREPAREDEATH;
 	else if(type == "extendedopcode")
 		_type = CREATURE_EVENT_EXTENDED_OPCODE;
-	else if(type == "mount")
+	else if (type == "mount")
 		_type = CREATURE_EVENT_MOUNT;
-	else if(type == "dismount")
+	else if (type == "dismount")
 		_type = CREATURE_EVENT_DISMOUNT;
 	else if(type == "moveitem")
 		_type = CREATURE_EVENT_MOVEITEM;
@@ -2179,10 +2179,10 @@ uint32_t CreatureEvent::executeExtendedOpcode(Creature* creature, uint8_t opcode
 uint32_t CreatureEvent::executeMount(Player* player, uint8_t mountId)
 {
 	//onMount(cid, mountId)
-	if(m_interface->reserveEnv())
+	if (m_interface->reserveEnv())
 	{
 		ScriptEnviroment* env = m_interface->getEnv();
-		if(m_scripted == EVENT_SCRIPT_BUFFER)
+		if (m_scripted == EVENT_SCRIPT_BUFFER)
 		{
 			env->setRealPos(player->getPosition());
 			std::ostringstream scriptstream;
@@ -2190,11 +2190,11 @@ uint32_t CreatureEvent::executeMount(Player* player, uint8_t mountId)
 			scriptstream << "local cid = " << env->addThing(player) << std::endl;
 			scriptstream << "local mountId = " << mountId << std::endl;
 
-			if(m_scriptData)
+			if (m_scriptData)
 				scriptstream << *m_scriptData;
 
 			bool result = true;
-			if(m_interface->loadBuffer(scriptstream.str()))
+			if (m_interface->loadBuffer(scriptstream.str()))
 			{
 				lua_State* L = m_interface->getState();
 				result = m_interface->getGlobalBool(L, "_result", true);
@@ -2205,11 +2205,11 @@ uint32_t CreatureEvent::executeMount(Player* player, uint8_t mountId)
 		}
 		else
 		{
-			#ifdef __DEBUG_LUASCRIPTS__
+#ifdef __DEBUG_LUASCRIPTS__
 			char desc[35];
 			sprintf(desc, "%s", player->getName().c_str());
 			env->setEvent(desc);
-			#endif
+#endif
 
 			env->setScriptId(m_scriptId, m_interface);
 			env->setRealPos(player->getPosition());
@@ -2235,10 +2235,10 @@ uint32_t CreatureEvent::executeMount(Player* player, uint8_t mountId)
 uint32_t CreatureEvent::executeDismount(Player* player, uint8_t mountId)
 {
 	//onDismount(cid, mountId)
-	if(m_interface->reserveEnv())
+	if (m_interface->reserveEnv())
 	{
 		ScriptEnviroment* env = m_interface->getEnv();
-		if(m_scripted == EVENT_SCRIPT_BUFFER)
+		if (m_scripted == EVENT_SCRIPT_BUFFER)
 		{
 			env->setRealPos(player->getPosition());
 			std::ostringstream scriptstream;
@@ -2246,11 +2246,11 @@ uint32_t CreatureEvent::executeDismount(Player* player, uint8_t mountId)
 			scriptstream << "local cid = " << env->addThing(player) << std::endl;
 			scriptstream << "local mountId = " << mountId << std::endl;
 
-			if(m_scriptData)
+			if (m_scriptData)
 				scriptstream << *m_scriptData;
 
 			bool result = true;
-			if(m_interface->loadBuffer(scriptstream.str()))
+			if (m_interface->loadBuffer(scriptstream.str()))
 			{
 				lua_State* L = m_interface->getState();
 				result = m_interface->getGlobalBool(L, "_result", true);
@@ -2261,11 +2261,11 @@ uint32_t CreatureEvent::executeDismount(Player* player, uint8_t mountId)
 		}
 		else
 		{
-			#ifdef __DEBUG_LUASCRIPTS__
+#ifdef __DEBUG_LUASCRIPTS__
 			char desc[35];
 			sprintf(desc, "%s", player->getName().c_str());
 			env->setEvent(desc);
-			#endif
+#endif
 
 			env->setScriptId(m_scriptId, m_interface);
 			env->setRealPos(player->getPosition());

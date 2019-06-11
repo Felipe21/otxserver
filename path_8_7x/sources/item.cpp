@@ -178,7 +178,7 @@ Item::Item(const uint16_t type, uint16_t amount/* = 0*/):
 	setItemCount(1);
 	setDefaultDuration();
 	itemUid = -1;
-	
+
 	const ItemType& it = items[type];
 	if(it.isFluidContainer() || it.isSplash())
 		setFluidType(amount);
@@ -926,7 +926,7 @@ std::string Item::getDescription(const ItemType& it, int32_t lookDistance, const
 				}
 			}
 		}
-
+		
 		if(it.criticalHitChance || (item && item->getCriticalHitChance()))
 		{
 			if(begin)

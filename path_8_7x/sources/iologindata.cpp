@@ -422,7 +422,7 @@ bool IOLoginData::loadPlayer(Player* player, const std::string& name, bool preLo
 	std::ostringstream query;
 	query << "SELECT `id`, `account_id`, `group_id`, `world_id`, `sex`, `vocation`, `experience`, `level`, "
 	<< "`maglevel`, `health`, `healthmax`, `blessings`, `pvp_blessing`, `mana`, `manamax`, `manaspent`, `soul`, "
-	<< "`lookbody`, `lookfeet`, `lookhead`, `looklegs`, `looktype`, `lookaddons`, `lookmount`, `posx`, `posy`, "
+	<< "`lookbody`, `lookfeet`, `lookhead`, `looklegs`, `looktype`, `lookaddons`, `posx`, `posy`, "
 	<< "`posz`, `cap`, `lastlogin`, `lastlogout`, `lastip`, `conditions`, `skull`, `skulltime`, `guildnick`, "
 	<< "`rank_id`, `town_id`, `balance`, `stamina`, `direction`, `loss_experience`, `loss_mana`, `loss_skills`, "
 	<< "`loss_containers`, `loss_items`, `marriage`, `promotion`, `description`, `offlinetraining_time`, `offlinetraining_skill`, "
@@ -556,10 +556,6 @@ bool IOLoginData::loadPlayer(Player* player, const std::string& name, bool preLo
 	player->defaultOutfit.lookLegs = result->getDataInt("looklegs");
 	player->defaultOutfit.lookFeet = result->getDataInt("lookfeet");
 	player->defaultOutfit.lookAddons = result->getDataInt("lookaddons");
-
-	int32_t lookMount = result->getDataInt("lookmount");
-	player->defaultOutfit.lookMount = (lookMount & 0xFFFF);
-	player->mounted = ((lookMount & 0xFFFF0000) != 0);
 
 	player->currentOutfit = player->defaultOutfit;
 	Skulls_t skull = SKULL_RED;
@@ -816,18 +812,7 @@ bool IOLoginData::loadPlayer(Player* player, const std::string& name, bool preLo
 		query << "SELECT `pd`.`player_id`, `pd`.`date` FROM `player_killers` pk LEFT JOIN `killers` k"
 			<< " ON `pk`.`kill_id` = `k`.`id` LEFT JOIN `player_deaths` pd ON `k`.`death_id` = `pd`.`id`"
 			<< " WHERE `pk`.`player_id` = " << player->getGUID() << " AND `k`.`unjustified` = 0 AND "
-			<< "`pd`.`date` >= " << (time(NULL) - (7 * 86400)) << " AND `k`.`war` = 0"; // TODO: configurable, same as up
-		if((result = db->storeQuery(query.str())))
-		{
-			do
-			{
-				if(!deaths[result->getDataInt("player_id")] || deaths[result->getDataInt("player_id")]
-					>= (time_t)result->getDataInt("date"))
-					player->addRevenge(result->getDataInt("player_id"));
-			}
-			while(result->next());
-			result->free();
-		}
+			<< "`pd`.`date` >= " << (time(NULL) - (7 * 86400)) << " AND `k`.`war` = 0";
 	}
 
 	player->updateInventoryWeight();
@@ -916,7 +901,6 @@ bool IOLoginData::savePlayer(Player* player, bool preSave/* = true*/, bool shall
 	query << "`looklegs` = " << (uint32_t)player->defaultOutfit.lookLegs << ", ";
 	query << "`looktype` = " << (uint32_t)player->defaultOutfit.lookType << ", ";
 	query << "`lookaddons` = " << (uint32_t)player->defaultOutfit.lookAddons << ", ";
-	query << "`lookmount` = " << (uint32_t)(player->defaultOutfit.lookMount | ((uint32_t)(player->isMounted()) << 16)) << ", ";
 	query << "`maglevel` = " << player->magLevel << ", ";
 	query << "`mana` = " << player->mana << ", ";
 	query << "`manamax` = " << player->manaMax << ", ";
@@ -1997,9 +1981,8 @@ bool IOLoginData::resetGuildInformation(uint32_t guid)
 
 void IOLoginData::increaseBankBalance(uint32_t guid, uint64_t bankBalance)
 {
-	Database* db = Database::getInstance();
+	// Database* db = Database::getInstance();
 	std::ostringstream query;
-
 	query << "UPDATE `players` SET `balance` = `balance` + " << bankBalance << " WHERE `id` = " << guid << ";";
-	Database::getInstance()->query(query.str());
+	// return db->query(query.str());
 }
